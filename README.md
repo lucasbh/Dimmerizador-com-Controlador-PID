@@ -1,4 +1,4 @@
-# Dimmerizador-com-Controlador-PID
+# Dimmerizador com Controlador PID
  
 FUNDAÇÃO EDSON QUEIROZ
 UNIVERSIDADE DE FORTALEZA – UNIFOR
