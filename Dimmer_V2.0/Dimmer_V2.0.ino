@@ -143,7 +143,7 @@ void getSerial()
   }
   if(serialRead.length() > 0)
   {
-<<<<<<< HEAD
+
     if(serialRead.substring(0,2) == "L0")
     {
       setPoint = serialRead.substring(2).toInt();
@@ -155,7 +155,6 @@ void getSerial()
   }
 }
 
-=======
     String strCmp = serialRead.substring(0,2);
     if(strCmp == "L0") { setPoint = serialRead.substring(2).toInt(); }
     if(strCmp == "p+") { kp += 0.1; }
@@ -166,4 +165,3 @@ void getSerial()
     if(strCmp == "d-") { kd -= 0.001; }
   }
 }
->>>>>>> 38d4932384e50ac0cf6c73cad7323cf4e8d04d99
