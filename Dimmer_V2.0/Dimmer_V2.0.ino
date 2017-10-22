@@ -9,16 +9,13 @@
 
 #include <SoftwareSerial.h>
 
-SoftwareSerial mySerial(10,11);   //Inicia o software serial nos pinos 10 e 11
+SoftwareSerial mySerial(10,11);                                     //Inicia o software serial nos pinos 10 e 11
 //Pinos
 const int led0 = 3,    led1 = 5,    led2 = 6,    led3 = 9;
 const int ldr0 = A0,   ldr1 = A1,   ldr2 = A2,   ldr3 = A3;
 //Variaveis do PID
-float kp0 = 0.3,  ki0 = 0.009,  kd0 = 0.006,  i0;
-float kp1 = 0.3,  ki1 = 0.009,  kd1 = 0.006,  i1;
-float kp2 = 0.3,  ki2 = 0.009,  kd2 = 0.006,  i2;
-float kp3 = 0.3,  ki3 = 0.009,  kd3 = 0.006,  i3;
-int setPoint = 85;     //O setPoint de luminosidade sempre começa em 85% ???
+float kp = 0.3,  ki = 0.009,  kd = 0.006,  i0, i1, i2, i3;
+int setPoint = 85;                                                  //O setPoint de luminosidade sempre começa em 85% ???
 int erro0, erro1, erro2, erro3;
 int vAtual0, vAtual1, vAtual2, vAtual3;
 unsigned long tAtual0 = 0, tAtual1 = 0, tAtual2 = 0, tAtual3 = 0;
@@ -51,7 +48,7 @@ void loop() {
   analogWrite(led3, pid3);
 
 //Dados para o monitor serial
-  if(millis() - lastTime > 300){
+  if(millis() - lastTime > 1000){
     lastTime = millis();
     int ldrr0 = map(analogRead(ldr0), 1023, 7, 0, 100);
     int ldrr1 = map(analogRead(ldr1), 1020, 5, 0, 100);
@@ -74,7 +71,6 @@ float getPID(int ledRead, const int &LED)
   int *valorAtual, *erro;
   float *i;
   unsigned long *tempoAtual;
-  float *kp, *ki, *kd;
 
   switch (LED)
   {
@@ -84,9 +80,6 @@ float getPID(int ledRead, const int &LED)
       erro = &erro0;
       tempoAtual = &tAtual0;
       i = &i0;
-      kp = &kp0;
-      ki = &ki0;
-      kd = &kd0;
     }break;
     case led1:
     {
@@ -94,9 +87,6 @@ float getPID(int ledRead, const int &LED)
       erro = &erro1;
       tempoAtual = &tAtual1;
       i = &i1;
-      kp = &kp1;
-      ki = &ki1;
-      kd = &kd1;
     }break;
     case led2:
     {
@@ -104,9 +94,6 @@ float getPID(int ledRead, const int &LED)
       erro = &erro2;
       tempoAtual = &tAtual2;
       i = &i2;
-      kp = &kp2;
-      ki = &ki2;
-      kd = &kd2;
     }break;
     case led3:
     {
@@ -114,9 +101,6 @@ float getPID(int ledRead, const int &LED)
       erro = &erro3;
       tempoAtual = &tAtual3;
       i = &i3;
-      kp = &kp3;
-      ki = &ki3;
-      kd = &kd3;
     }break;
   }
 
@@ -130,11 +114,11 @@ float getPID(int ledRead, const int &LED)
   *tempoAtual = millis();
   double dt = *tempoAtual - tempoAnterior;
 
-  float p = *erro * (*kp);                  // P = kp*E(t)
-  *i += *erro * (*ki) * dt;                 // i = ki*SE(t)*dt
+  float p = *erro * kp;                  // P = kp*E(t)
+  *i += *erro * ki * dt;                 // i = ki*SE(t)*dt
   if(*i > 200) { *i = 200; }                // i está limitado a -50 e 200
   if(*i < -50)   { *i = -50; }
-  float d = (*valorAtual - valorAnterior) * dt * (*kd);     // d = kd*(dE(t)/d(t))
+  float d = (*valorAtual - valorAnterior) * dt * kd;     // d = kd*(dE(t)/d(t))
   float PID = 50+ p + *i + d;
   if(PID > 255) { PID = 255; }
   if(PID < 0) { PID = 0; }
@@ -162,6 +146,10 @@ void getSerial()
     if(serialRead.substring(0,2) == "L0")
     {
       setPoint = serialRead.substring(2).toInt();
+    }
+        if(serialRead.substring(0,2) == "p+")
+    {
+      kp = serialRead.substring(2).toFloat();
     }
   }
 }
