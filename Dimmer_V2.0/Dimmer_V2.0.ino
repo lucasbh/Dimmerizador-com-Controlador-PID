@@ -6,13 +6,13 @@
  * LDR1: max = 5   min = 1020
  * LDR2: max = 10  min = 1023
  */
-
 #include <SoftwareSerial.h>
 
 SoftwareSerial mySerial(10,11);                                     //Inicia o software serial nos pinos 10 e 11
 //Pinos
 const int led0 = 3,    led1 = 5,    led2 = 6,    led3 = 9;
 const int ldr0 = A0,   ldr1 = A1,   ldr2 = A2,   ldr3 = A3;
+
 //Variaveis do PID
 float kp = 0.3,  ki = 0.009,  kd = 0.006,  i0, i1, i2, i3;
 int setPoint = 85;                                                  //O setPoint de luminosidade sempre começa em 85% ???
@@ -20,6 +20,10 @@ int erro0, erro1, erro2, erro3;
 int vAtual0, vAtual1, vAtual2, vAtual3;
 unsigned long tAtual0 = 0, tAtual1 = 0, tAtual2 = 0, tAtual3 = 0;
 unsigned long lastTime = 0;
+float pid0, pid1, pid2, pid3;
+
+//Variaveis extras
+int ldrRead0, ldrRead1, ldrRead2;
 
 void setup() {
   // put your setup code here, to run once:
@@ -34,33 +38,22 @@ void loop() {
   getSerial();        //Lê o bluetooth
   
   //Calculo do PID e escrita do pid nos pinos
-  int ledRead0 = map(analogRead(ldr0), 1023, 7, 0, 100);
-  float pid0 = getPID(ledRead0, led0);
+  ldrRead0 = map(analogRead(ldr0), 1023, 7, 0, 100);
+  ldrRead1 = map(analogRead(ldr1), 1023, 7, 0, 100);
+  ldrRead2 = map(analogRead(ldr2), 1023, 7, 0, 100);
+  
+  pid0 = getPID(ldrRead0, led0);
   analogWrite(led0, pid0);
-  int ledRead1 = map(analogRead(ldr0), 1023, 7, 0, 100)/2 + map(analogRead(ldr1), 1020, 5, 0, 100)/2;
-  float pid1 = getPID(ledRead1, led1); 
+  pid1 = getPID((ldrRead0/2 + ldrRead1/2), led1); 
   analogWrite(led1, pid1);
-  int ledRead2 = map(analogRead(ldr1), 1020, 5, 0, 100)/2 + map(analogRead(ldr2), 1023, 10, 0, 100)/2;
-  float pid2 = getPID(ledRead2, led2);
+  pid2 = getPID(ldrRead1/2 + ldrRead2/2, led2);
   analogWrite(led2, pid2);
-  int ledRead3 = map(analogRead(ldr2), 1023, 10, 0, 100);
-  float pid3 = getPID(ledRead3, led3);
+  pid3 = getPID(ldrRead2, led3);
   analogWrite(led3, pid3);
 
-//Dados para o monitor serial
-  if(millis() - lastTime > 1000){
-    lastTime = millis();
-    int ldrr0 = map(analogRead(ldr0), 1023, 7, 0, 100);
-    int ldrr1 = map(analogRead(ldr1), 1020, 5, 0, 100);
-    int ldrr2 = map(analogRead(ldr2), 1023, 10, 0, 100);
-    /*int ldrr0 = analogRead(ldr0);
-    int ldrr1 = analogRead(ldr1);
-    int ldrr2 = analogRead(ldr2);*/
-    String msgPID = String((float)pid0) + " " + String((float)pid1) + " " + String((float)pid2) + " " + String((float)pid3);
-    String msgLDR = String((int)ldrr0) + " " + String((int)ldrr1) + " " + String((int)ldrr2);
-    Serial.println(msgPID + "\t" + msgLDR);
-  }
+  sendSerial();
 }
+
 
 /* 
  *  A função getPID retorna o controlador PID, que está limitado a um valor entre 0 e 255.
@@ -148,20 +141,29 @@ void getSerial()
     {
       setPoint = serialRead.substring(2).toInt();
     }
-        if(serialRead.substring(0,2) == "p+")
-    {
-      kp = serialRead.substring(2).toFloat();
-    }
+  }
+
+  String strCmp = serialRead.substring(0,2);
+  if(strCmp == "L0") { setPoint = serialRead.substring(2).toInt(); }
+  if(strCmp == "p+") { kp = kp + 0.1; }
+  if(strCmp == "p-") { kp -= 0.1; }
+  if(strCmp == "i+") { ki += 0.001; }
+  if(strCmp == "i-") { ki -= 0.001; }
+  if(strCmp == "d+") { kd += 0.001; }
+  if(strCmp == "d-") { kd -= 0.001; }
+}
+  
+void sendSerial()         //Dados para o monitor serial
+{
+  if(millis() - lastTime > 1000){
+    lastTime = millis();
+    String msgPID = String((float)pid0) + " " + String((float)pid1) + " " + String((float)pid2) + " " + String((float)pid3);
+    String msgLDR = "LDR 0: " + String((int)ldrRead0) + " LDR 1: " + String((int)ldrRead1) + " LDR 2: " + String((int)ldrRead2);
+    Serial.println(msgPID + "\t" + msgLDR);
+    
+    mySerial.println("kp " + String((float)kp));
+    mySerial.println("ki " + String((float)ki));
+    mySerial.println("kd " + String((float)kd));
   }
 }
 
-    String strCmp = serialRead.substring(0,2);
-    if(strCmp == "L0") { setPoint = serialRead.substring(2).toInt(); }
-    if(strCmp == "p+") { kp += 0.1; }
-    if(strCmp == "p-") { kp -= 0.1; }
-    if(strCmp == "i+") { ki += 0.001; }
-    if(strCmp == "i-") { ki -= 0.001; }
-    if(strCmp == "d+") { kd += 0.001; }
-    if(strCmp == "d-") { kd -= 0.001; }
-  }
-}
