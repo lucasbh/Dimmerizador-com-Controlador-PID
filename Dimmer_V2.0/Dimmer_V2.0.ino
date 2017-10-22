@@ -143,6 +143,18 @@ void getSerial()
   }
   if(serialRead.length() > 0)
   {
+
+    if(serialRead.substring(0,2) == "L0")
+    {
+      setPoint = serialRead.substring(2).toInt();
+    }
+        if(serialRead.substring(0,2) == "p+")
+    {
+      kp = serialRead.substring(2).toFloat();
+    }
+  }
+}
+
     String strCmp = serialRead.substring(0,2);
     if(strCmp == "L0") { setPoint = serialRead.substring(2).toInt(); }
     if(strCmp == "p+") { kp += 0.1; }
