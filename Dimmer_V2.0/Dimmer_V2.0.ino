@@ -6,7 +6,7 @@
  * LDR1: max = 5   min = 1020
  * LDR2: max = 10  min = 1023
  */
- // tesssssteeeee
+
 #include <SoftwareSerial.h>
 
 SoftwareSerial mySerial(10,11);   //Inicia o software serial nos pinos 10 e 11
