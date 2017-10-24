@@ -1,4 +1,4 @@
-# Dimmerizador com Controlador PID
+﻿# Dimmerizador com Controlador PID
  
 FUNDAÇÃO EDSON QUEIROZ
 UNIVERSIDADE DE FORTALEZA – UNIFOR
@@ -14,20 +14,9 @@ Marcos Vinicius Cândido Leitão
 Pedro Benevides Cavalcante
 
 
-vamos fazer um teste de edição
-
-
-
-
-
-
-
-
-
-
-
 2017
 Fortaleza – CE
+
 INTRODUÇÃO
 
 	Com o passar dos dias é notável que a automação está se tornando mais rotineira em nossas residências. Desde tarefas complexas como o controle de temperatura para um morador com necessidades especiais, até o simples controle da iluminação de determinados cômodos.
