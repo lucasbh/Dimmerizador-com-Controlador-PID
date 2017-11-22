@@ -24,36 +24,58 @@ float pid0, pid1, pid2, pid3;
 
 //Variaveis extras
 int ldrRead0, ldrRead1, ldrRead2;
+int flagManAuto = 0;
 
 void setup() {
   // put your setup code here, to run once:
   pinMode(led0, OUTPUT);
+  pinMode(led1, OUTPUT);
+  pinMode(led2, OUTPUT);
+  pinMode(led3, OUTPUT);
+  
   pinMode(ldr0, INPUT);
+  pinMode(ldr1, INPUT);
+  pinMode(ldr2, INPUT);
+  pinMode(ldr3, INPUT);
+  
   Serial.begin(115200);
   mySerial.begin(9600);
 }
 
 void loop() {
   
-  getSerial();        //Lê o bluetooth
-  
-  //Calculo do PID e escrita do pid nos pinos
-  ldrRead0 = map(analogRead(ldr0), 1023, 7, 0, 100);
-  ldrRead1 = map(analogRead(ldr1), 1023, 7, 0, 100);
-  ldrRead2 = map(analogRead(ldr2), 1023, 7, 0, 100);
-  
-  pid0 = getPID(ldrRead0, led0);
-  analogWrite(led0, pid0);
-  pid1 = getPID((ldrRead0/2 + ldrRead1/2), led1); 
-  analogWrite(led1, pid1);
-  pid2 = getPID(ldrRead1/2 + ldrRead2/2, led2);
-  analogWrite(led2, pid2);
-  pid3 = getPID(ldrRead2, led3);
-  analogWrite(led3, pid3);
+  //Leitura do bluetooth
+  getSerial();        
 
-  sendSerial();
+  if(!flagManAuto)
+  {
+    //Calculo do PID e escrita do pid nos pinos
+    ldrRead0 = map(analogRead(ldr0), 1023, 7, 0, 100);
+    ldrRead1 = map(analogRead(ldr1), 1023, 7, 0, 100);
+    ldrRead2 = map(analogRead(ldr2), 1023, 7, 0, 100);
+    
+    pid0 = getPID(ldrRead0, led0);
+    analogWrite(led0, pid0);
+    
+    pid1 = getPID((ldrRead0/2 + ldrRead1/2), led1); 
+    analogWrite(led1, pid1);
+    
+    pid2 = getPID(ldrRead1/2 + ldrRead2/2, led2);
+    analogWrite(led2, pid2);
+    
+    pid3 = getPID(ldrRead2, led3);
+    analogWrite(led3, pid3);
+  
+    sendSerial();
+  }else
+  {
+    int ledManual = setPoint*2.55;
+    analogWrite(led0, ledManual);
+    analogWrite(led1, ledManual);
+    analogWrite(led2, ledManual);
+    analogWrite(led3, ledManual);
+  }
 }
-
 
 /* 
  *  A função getPID retorna o controlador PID, que está limitado a um valor entre 0 e 255.
@@ -97,9 +119,10 @@ float getPID(int ledRead, const int &LED)
     }break;
   }
 
-  //Encontrando E(t)
+  //Encontrando E(t) (erro)
   int valorAnterior = *valorAtual;
   *valorAtual = ledRead;
+  int lastErro = *erro;
   *erro = setPoint - *valorAtual;
 
   //Encontrando dt
@@ -107,12 +130,13 @@ float getPID(int ledRead, const int &LED)
   *tempoAtual = millis();
   double dt = *tempoAtual - tempoAnterior;
 
-  float p = *erro * kp;                  // P = kp*E(t)
-  *i += *erro * ki * dt;                 // i = ki*SE(t)*dt
-  if(*i > 200) { *i = 200; }                // i está limitado a -50 e 200
+  float p = *erro * kp;                                   // P = kp*E(t)
+  *i += *erro * ki * dt;                                  // i = ki*SE(t)*dt
+  if(*i > 200) { *i = 200; }                              // i está limitado a -50 e 200
   if(*i < -50)   { *i = -50; }
-  float d = (*valorAtual - valorAnterior) * dt * kd;     // d = kd*(dE(t)/d(t))
-  float PID = 50+ p + *i + d;
+  float d = kd * ((*erro - lastErro) / dt);     // d = kd*(dE(t)/d(t))
+  
+  float PID = 50 + p + *i + d;
   if(PID > 255) { PID = 255; }
   if(PID < 0) { PID = 0; }
 
@@ -136,34 +160,38 @@ void getSerial()
   }
   if(serialRead.length() > 0)
   {
-
-    if(serialRead.substring(0,2) == "L0")
-    {
-      setPoint = serialRead.substring(2).toInt();
-    }
+    String strCmp = serialRead.substring(0,2);
+    if(strCmp == "L0") { setPoint = serialRead.substring(2).toInt(); }
+    if(strCmp == "p+") { kp = kp + 0.1; }
+    if(strCmp == "p-") { kp -= 0.1; }
+    if(strCmp == "i+") { ki += 0.001; }
+    if(strCmp == "i-") { ki -= 0.001; }
+    if(strCmp == "d+") { kd += 0.001; }
+    if(strCmp == "d-") { kd -= 0.001; }
+    if(strCmp == "FA") { flagManAuto = 0; }
+    if(strCmp == "FM") { flagManAuto = 1; }
   }
-
-  String strCmp = serialRead.substring(0,2);
-  if(strCmp == "L0") { setPoint = serialRead.substring(2).toInt(); }
-  if(strCmp == "p+") { kp = kp + 0.1; }
-  if(strCmp == "p-") { kp -= 0.1; }
-  if(strCmp == "i+") { ki += 0.001; }
-  if(strCmp == "i-") { ki -= 0.001; }
-  if(strCmp == "d+") { kd += 0.001; }
-  if(strCmp == "d-") { kd -= 0.001; }
 }
-  
+
 void sendSerial()         //Dados para o monitor serial
 {
   if(millis() - lastTime > 1000){
-    lastTime = millis();
-    String msgPID = String((float)pid0) + " " + String((float)pid1) + " " + String((float)pid2) + " " + String((float)pid3);
-    String msgLDR = "LDR 0: " + String((int)ldrRead0) + " LDR 1: " + String((int)ldrRead1) + " LDR 2: " + String((int)ldrRead2);
-    Serial.println(msgPID + "\t" + msgLDR);
-    
-    mySerial.println("kp " + String((float)kp));
-    mySerial.println("ki " + String((float)ki));
-    mySerial.println("kd " + String((float)kd));
+    if(!flagManAuto){
+      lastTime = millis();
+      String msgPID = String((float)pid0) + " " + String((float)pid1) + " " + String((float)pid2) + " " + String((float)pid3);
+      String msgLDR = "LDR 0: " + String((int)ldrRead0) + " LDR 1: " + String((int)ldrRead1) + " LDR 2: " + String((int)ldrRead2);
+      Serial.println(msgPID + "\t" + msgLDR);
+      
+      mySerial.println("kp " + String((float)kp));
+      mySerial.println("ki " + String((float)ki));
+      mySerial.println("kd " + String((float)kd));
+      mySerial.println("M0");
+      mySerial.println("A1");
+    }
+    if(flagManAuto){
+      mySerial.println("M1");
+      mySerial.println("A0");
+    }
   }
 }
 
