@@ -47,7 +47,7 @@ void loop() {
   //Leitura do bluetooth
   getSerial();        
 
-  if(!flagManAuto)
+  if(!flagManAuto)      // Se a flag estiver em automatico (false)
   {
     //Calculo do PID e escrita do pid nos pinos
     ldrRead0 = map(analogRead(ldr0), 1023, 7, 0, 100);
@@ -67,7 +67,7 @@ void loop() {
     analogWrite(led3, pid3);
   
     sendSerial();
-  }else
+  }else                 // Se a flag estiver em manual (true)
   {
     int ledManual = setPoint*2.55;
     analogWrite(led0, ledManual);
@@ -77,12 +77,12 @@ void loop() {
   }
 }
 
-/* 
- *  A função getPID retorna o controlador PID, que está limitado a um valor entre 0 e 255.
- *  O switchcase analisa qual LDR e setPoint foram passados na função e executa o PID com base nisso
- */
+
 float getPID(int ledRead, const int &LED)
 {
+//A função getPID retorna o controlador PID, que está limitado a um valor entre 0 e 255.
+//O switchcase analisa qual LDR e setPoint foram passados na função e executa o PID com base nisso
+
   int *valorAtual, *erro;
   float *i;
   unsigned long *tempoAtual;
@@ -143,16 +143,13 @@ float getPID(int ledRead, const int &LED)
   return PID;
 }
 
-/* 
- *  Leitura dos dados via bluetooth
- *  O app envia o ID do objeto mais o valor. EX: setar o slider da sala0 para 68% envia a string "L060"
- */
 void getSerial()
 {
-  //  Leitura dos dados via bluetooth
-  //  O app envia o ID do objeto mais o valor. EX: setar o slider da sala0 para 68% envia a string "L060"
+//Leitura dos dados via bluetooth
+//O app envia o ID do objeto mais o valor. EX: setar o slider da sala0 para 68% envia a string "L060"
+
   String serialRead = "";
-  while(mySerial.available())
+  while(mySerial.available())       //Leitura do dado serial
   {
     char c = mySerial.read();
     serialRead += c;
@@ -160,21 +157,29 @@ void getSerial()
   }
   if(serialRead.length() > 0)
   {
-    String strCmp = serialRead.substring(0,2);
+    String strCmp = serialRead.substring(0,2);                           //Comparação do dado recebido p/ executar uma ação
+
+    // atualiza o setPoint
     if(strCmp == "L0") { setPoint = serialRead.substring(2).toInt(); }
-    if(strCmp == "p+") { kp = kp + 0.1; }
+
+    // setTunings: Altera os ganhos do controlador
+    if(strCmp == "p+") { kp = kp + 0.1; }        
     if(strCmp == "p-") { kp -= 0.1; }
     if(strCmp == "i+") { ki += 0.001; }
     if(strCmp == "i-") { ki -= 0.001; }
     if(strCmp == "d+") { kd += 0.001; }
     if(strCmp == "d-") { kd -= 0.001; }
+
+    // on/off(Auto/Man): altera de manual para automatico.
     if(strCmp == "FA") { flagManAuto = 0; }
     if(strCmp == "FM") { flagManAuto = 1; }
   }
 }
 
-void sendSerial()         //Dados para o monitor serial
+void sendSerial()         
 {
+// Envia dados para o monitor serial e para o aplicativo.
+
   if(millis() - lastTime > 1000){
     if(!flagManAuto){
       lastTime = millis();
@@ -194,4 +199,3 @@ void sendSerial()         //Dados para o monitor serial
     }
   }
 }
-
