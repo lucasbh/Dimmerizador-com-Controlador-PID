@@ -92,7 +92,11 @@ O PID inicial é projetado para ser chamado de forma irregular. Isso causa dois 
 Para isso, a solução foi certificar que o PID seja chamado em um intervalo regular. A maneira decidida para fazer isso é especificar que a função de cálculo seja chamada de cada ciclo com base em um Tempo de Amostra pré-determinado, o PID decide se ele deve calcular ou retornar imediatamente. Uma vez que sabemos que o PID está sendo avaliado em um intervalo constante, os cálculos derivado e integral também podem ser simplificados.
 
 #### Derivative Kick
-Uma vez que o erro = Setpoint - entrada, qualquer alteração no Setpoint causa uma alteração instantânea no erro. A derivada desta mudança é infinita (na prática, uma vez que o dt não é 0, apenas acaba sendo um número muito grande). Esse número é alimentado na equação de pid, o que resulta em um pico indesejável na saída. Felizmente, há uma maneira fácil de se livrar disso.
+Uma vez que o erro = Setpoint - entrada, qualquer alteração no Setpoint causa uma alteração instantânea no erro. A derivada desta mudança é infinita (na prática, uma vez que o dt não é 0, apenas acaba sendo um número muito grande). Esse número é alimentado na equação de pid, o que resulta em um pico indesejável na saída.
+
+<img src="https://github.com/lucasbh/Dimmerizador-com-Controlador-PID/blob/master/Imagens/DonMExplain.png?raw=true" width="350">
+
+A derivada do erro é igual à derivada negativa da entrada, exceto quando o Setpoint está mudando. Isso acaba sendo uma solução perfeita. Em vez de adicionar (Kd * derivative of Error), subtrai-se (Kd * derivative of Input). Isso é conhecido como usando "Derivação na Medição"
 
 ## METODOLOGIA
 
