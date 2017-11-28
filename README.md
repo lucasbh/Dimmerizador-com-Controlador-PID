@@ -1,7 +1,9 @@
 # Dimmerizador com Controlador PID
  
 FUNDAÇÃO EDSON QUEIROZ
+
 UNIVERSIDADE DE FORTALEZA – UNIFOR
+
 Centro de Ciências Tecnológicas – CCT
 
 Controle Digital
@@ -9,11 +11,11 @@ Dimmerizador PID
 Prof. Afonso Henrique
 
 ## AUTORES
-Lucas Bezerra Holanda
+**Lucas Bezerra Holanda**
 
-Marcos Vinicius Cândido Leitão
+**Marcos Vinicius Cândido Leitão**
 
-Pedro Benevides Cavalcante
+**Pedro Benevides Cavalcante**
 
 2017
 Fortaleza – CE
