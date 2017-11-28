@@ -134,7 +134,7 @@ float getPID(int ledRead, const int &LED)
   *i += *erro * ki * dt;                                  // i = ki*SE(t)*dt
   if(*i > 200) { *i = 200; }                              // i está limitado a -50 e 200
   if(*i < -50)   { *i = -50; }
-  float d = kd * ((*erro - lastErro) / dt);     // d = kd*(dE(t)/d(t))
+  float d = kd * ((*erro - lastErro) / dt);               // d = kd*(dE(t)/d(t))
   
   float PID = 50 + p + *i + d;
   if(PID > 255) { PID = 255; }
@@ -193,7 +193,7 @@ void sendSerial()
       mySerial.println("M0");
       mySerial.println("A1");
     }
-    if(flagManAuto){
+    else{
       mySerial.println("M1");
       mySerial.println("A0");
     }
