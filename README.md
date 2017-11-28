@@ -51,21 +51,21 @@ PROTEUS
    
 **Parte Superior da PCI**
 
-![Pci superior](Dimmerizador-com-Controlador-PID/Imagens/PCi top.png)
+<img src="https://user-images.githubusercontent.com/31712391/33335012-8aef9f06-d44a-11e7-9d7b-d009ee8ab9fc.png" width="350">
 
 **Parte Inferior da PCI**
 
-![Pci inferior](Dimmerizador-com-Controlador-PID/Imagens/PCi Bottom.png)
+<img src="https://user-images.githubusercontent.com/31712391/33335118-e61d5990-d44a-11e7-9e0d-dc828838e3e3.png" width="350">
 
-  Após realizar a impressão e  soldar os componetes a placa fica semelhante ao que é mostrado no modelo 3D abaixo:
+- Após realizar a impressão e  soldar os componetes a placa fica semelhante ao que é mostrado no modelo 3D abaixo:
 
 **PCI Superior em 3D**
 
-![Top 3D](Dimmerizador-com-Controlador-PID/Top 3D.png)
+<img src="https://user-images.githubusercontent.com/31712391/33335241-41cbefea-d44b-11e7-912b-8225e9aac878.png" width="350">
 
 **PCI Inferior em 3D**
 
-![Bot 3D](Dimmerizador-com-Controlador-PID/Bot 3D.png)
+<img src="https://user-images.githubusercontent.com/31712391/33335263-527d603a-d44b-11e7-8f97-2afcf3bdd9e2.png" width="350">
 
 |       Resistor    |       Valor       |
 |-------------------|-------------------|
