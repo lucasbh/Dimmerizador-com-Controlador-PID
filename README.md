@@ -37,11 +37,11 @@ Fortaleza – CE
 
 ### SOFTWARES UTILIZADOS
 
-ROBOREMO
+- ROBOREMO
 
    Roboremo é um aplicativo para android gratuito disponível na playstore que é utilizado para desenvolver simples interfaces e se comunicar de diferentes formas. O aplicativo se comunicará com o arduino via bluetooth, e este envia os dados inseridos na tela de acordo com o que foi programado pelo usuário. 
 
-PROTEUS 
+- PROTEUS 
 
    O Proteus Design Suite é um Electronic Design Automation ferramenta (EDA), incluindo captura esquemática, simulação e módulos de layout PCi. 
 	
@@ -49,25 +49,19 @@ PROTEUS
 
    Para otimizar o espaço como a organização da parte física, resolvemos desenvolver uma pci para o projeto. Utilizando a ferramenta do Proteus de desenvolvimento de PCB, e partindo do esquemático desenvolvido no próprio Proteus. A placa foi desenvolvida para ser usada como um shield no Arduino Uno utilizado no projeto. As imagens necessárias para realizar a impressão estão listadas abaixo:
    
-**Parte Superior da PCI**
-
-<img src="https://user-images.githubusercontent.com/31712391/33335012-8aef9f06-d44a-11e7-9d7b-d009ee8ab9fc.png" width="350">
-
-**Parte Inferior da PCI**
-
-<img src="https://user-images.githubusercontent.com/31712391/33335118-e61d5990-d44a-11e7-9e0d-dc828838e3e3.png" width="350">
+**Parte Superior da PCI**|**Parte Inferior da PCI**|
+ :-----------------------------:|:-------------------------------:|
+<img src="https://user-images.githubusercontent.com/31712391/33335012-8aef9f06-d44a-11e7-9d7b-d009ee8ab9fc.png" width="250">|<img src="https://user-images.githubusercontent.com/31712391/33335118-e61d5990-d44a-11e7-9e0d-dc828838e3e3.png" width="250">
 
 - Após realizar a impressão e  soldar os componetes a placa fica semelhante ao que é mostrado no modelo 3D abaixo:
 
-**PCI Superior em 3D**
+|**PCI Superior em 3D**|**PCI Inferior em 3D**|
+|:-----------------------------:|:-------------------------------:|
+<img src="https://user-images.githubusercontent.com/31712391/33335241-41cbefea-d44b-11e7-912b-8225e9aac878.png" width="250">|<img src="https://user-images.githubusercontent.com/31712391/33335263-527d603a-d44b-11e7-8f97-2afcf3bdd9e2.png" width="250">
 
-<img src="https://user-images.githubusercontent.com/31712391/33335241-41cbefea-d44b-11e7-912b-8225e9aac878.png" width="350">
+- Lista de Resistores Utilizados:
 
-**PCI Inferior em 3D**
-
-<img src="https://user-images.githubusercontent.com/31712391/33335263-527d603a-d44b-11e7-8f97-2afcf3bdd9e2.png" width="350">
-
-|       Resistor    |       Valor       |
+|    **Resistor**   |    **Valor**      |
 |-------------------|-------------------|
 |         R8        |        10kΩ       |
 |         R9        |         1kΩ       |
@@ -98,7 +92,7 @@ Uma vez que o erro = Setpoint - entrada, qualquer alteração no Setpoint causa 
 
 A derivada do erro é igual à derivada negativa da entrada, exceto quando o Setpoint está mudando. Isso acaba sendo uma solução perfeita. Em vez de adicionar (Kd * derivative of Error), subtrai-se (Kd * derivative of Input). Isso é conhecido como usando "Derivação na Medição"
 
-## METODOLOGIA
+## FUNCIONAMENTO
 
    O dimmerizador controla o nível de luminosidade do ambiente automaticamente e se adapta a mudanças de claridade, aumentando ou diminuindo o brilho dos LEDs de acordo a luminosidade captada pelo LDR. No projeto desenvolvido, foi projetado três pontos de leitura de luminosidade e quatro prontos e iluminação, com LDRs e LEDs respectivamente. 
 
