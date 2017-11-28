@@ -79,7 +79,7 @@ Fortaleza – CE
 
  
 
-## METODOLOGIA
+## FUNCIONAMENTO
 
    O dimmerizador controla o nível de luminosidade do ambiente automaticamente e se adapta a mudanças de claridade, aumentando ou diminuindo o brilho dos LEDs de acordo a luminosidade captada pelo LDR. No projeto desenvolvido, foi projetado três pontos de leitura de luminosidade e quatro prontos e iluminação, com LDRs e LEDs respectivamente. 
 
