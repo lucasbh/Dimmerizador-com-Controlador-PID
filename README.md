@@ -47,183 +47,40 @@ PROTEUS
 	
 ### DESENVOLVIMENTO DE PCi
 
+   Para otimizar o espaço como a organização da parte física, resolvemos desenvolver uma pci para o projeto. Utilizando a ferramenta do Proteus de desenvolvimento de PCB, e partindo do esquemático desenvolvido no próprio Proteus. A placa foi desenvolvida para ser usada como um shield no Arduino Uno utilizado no projeto. As imagens necessárias para realizar a impressão estão listadas abaixo:
+   
+**Parte Superior da PCI**
 
-	
+![Pci superior](Dimmerizador-com-Controlador-PID/Imagens/PCi top.png)
+
+**Parte Inferior da PCI**
+
+![Pci inferior](Dimmerizador-com-Controlador-PID/Imagens/PCi Bottom.png)
+
+  Após realizar a impressão e  soldar os componetes a placa fica semelhante ao que é mostrado no modelo 3D abaixo:
+
+**PCI Superior em 3D**
+
+![Top 3D](Dimmerizador-com-Controlador-PID/Top 3D.png)
+
+**PCI Inferior em 3D**
+
+![Bot 3D](Dimmerizador-com-Controlador-PID/Bot 3D.png)
+
+|       Resistor    |       Valor       |
+|-------------------|-------------------|
+|         R8        |        10kΩ       |
+|         R9        |         1kΩ       |
+|         R10       |         1kΩ       |
+|         R12       |       2,2kΩ       |
+
+
+
 
 ### A IMPLEMENTAÇÃO
 
    O programa começa com a inicialização das variáveis do programa e as variáveis de cada controlador PID (um para cada ponto de luz, totalizando quatro). O setPoint, que é variável de entrada do sistema, é inicializado com o valor 85. No setup é configurado cada pino e iniciado o software serial para comunicação bluetooth e o serial padrão para visualizar os dados do projeto no monitor serial. Na função loop() o programa sempre inicia verificando se há dado serial e, caso verdadeiro, os setPoints do projeto são atualizados de acordo com o que foi recebido. Em seguida é chamado a função getPID para cada ponto de luminosidade, que realiza todos os cálculos de controle e retorna um inteiro, que é um valor de 0 a 255. Logo após, é atualizado o PWM de cada LED com os valores obtidos em seu respectivo cálculo de controle e o programa retorna entra em loop.
 
-```
- /*
- * Pinos
- * LDR PEQUENO: min:983     max:25 
- * LDR GRANDE:  min:1012    max:33 
- * LDR0: max = 7   min = 1023
- * LDR1: max = 5   min = 1020
- * LDR2: max = 10  min = 1023
- */
-#include <SoftwareSerial.h>
-
-SoftwareSerial mySerial(10,11);                                     //Inicia o software serial nos pinos 10 e 11
-//Pinos
-const int led0 = 3,    led1 = 5,    led2 = 6,    led3 = 9;
-const int ldr0 = A0,   ldr1 = A1,   ldr2 = A2,   ldr3 = A3;
-
-//Variaveis do PID
-float kp = 0.3,  ki = 0.009,  kd = 0.006,  i0, i1, i2, i3;
-int setPoint = 85;                                                  //O setPoint de luminosidade sempre começa em 85% ???
-int erro0, erro1, erro2, erro3;
-int vAtual0, vAtual1, vAtual2, vAtual3;
-unsigned long tAtual0 = 0, tAtual1 = 0, tAtual2 = 0, tAtual3 = 0;
-unsigned long lastTime = 0;
-float pid0, pid1, pid2, pid3;
-
-//Variaveis extras
-int ldrRead0, ldrRead1, ldrRead2;
-
-void setup() {
-  // put your setup code here, to run once:
-  pinMode(led0, OUTPUT);
-  pinMode(ldr0, INPUT);
-  Serial.begin(115200);
-  mySerial.begin(9600);
-}
-
-void loop() {
-  
-  getSerial();        //Lê o bluetooth
-  
-  //Calculo do PID e escrita do pid nos pinos
-  ldrRead0 = map(analogRead(ldr0), 1023, 7, 0, 100);
-  ldrRead1 = map(analogRead(ldr1), 1023, 7, 0, 100);
-  ldrRead2 = map(analogRead(ldr2), 1023, 7, 0, 100);
-  
-  pid0 = getPID(ldrRead0, led0);
-  analogWrite(led0, pid0);
-  pid1 = getPID((ldrRead0/2 + ldrRead1/2), led1); 
-  analogWrite(led1, pid1);
-  pid2 = getPID(ldrRead1/2 + ldrRead2/2, led2);
-  analogWrite(led2, pid2);
-  pid3 = getPID(ldrRead2, led3);
-  analogWrite(led3, pid3);
-
-  sendSerial();
-}
-
-
-/* 
- *  A função getPID retorna o controlador PID, que está limitado a um valor entre 0 e 255.
- *  O switchcase analisa qual LDR e setPoint foram passados na função e executa o PID com base nisso
- */
-float getPID(int ledRead, const int &LED)
-{
-  int *valorAtual, *erro;
-  float *i;
-  unsigned long *tempoAtual;
-
-  switch (LED)
-  {
-    case led0:
-    {
-      valorAtual = &vAtual0;
-      erro = &erro0;
-      tempoAtual = &tAtual0;
-      i = &i0;
-    }break;
-    case led1:
-    {
-      valorAtual = &vAtual1;
-      erro = &erro1;
-      tempoAtual = &tAtual1;
-      i = &i1;
-    }break;
-    case led2:
-    {
-      valorAtual = &vAtual2;
-      erro = &erro2;
-      tempoAtual = &tAtual2;
-      i = &i2;
-    }break;
-    case led3:
-    {
-      valorAtual = &vAtual3;
-      erro = &erro3;
-      tempoAtual = &tAtual3;
-      i = &i3;
-    }break;
-  }
-
-  //Encontrando E(t)
-  int valorAnterior = *valorAtual;
-  *valorAtual = ledRead;
-  *erro = setPoint - *valorAtual;
-
-  //Encontrando dt
-  unsigned long tempoAnterior = *tempoAtual;
-  *tempoAtual = millis();
-  double dt = *tempoAtual - tempoAnterior;
-
-  float p = *erro * kp;                  // P = kp*E(t)
-  *i += *erro * ki * dt;                 // i = ki*SE(t)*dt
-  if(*i > 200) { *i = 200; }                // i está limitado a -50 e 200
-  if(*i < -50)   { *i = -50; }
-  float d = (*valorAtual - valorAnterior) * dt * kd;     // d = kd*(dE(t)/d(t))
-  float PID = 50+ p + *i + d;
-  if(PID > 255) { PID = 255; }
-  if(PID < 0) { PID = 0; }
-
-  return PID;
-}
-
-/* 
- *  Leitura dos dados via bluetooth
- *  O app envia o ID do objeto mais o valor. EX: setar o slider da sala0 para 68% envia a string "L060"
- */
-void getSerial()
-{
-  //  Leitura dos dados via bluetooth
-  //  O app envia o ID do objeto mais o valor. EX: setar o slider da sala0 para 68% envia a string "L060"
-  String serialRead = "";
-  while(mySerial.available())
-  {
-    char c = mySerial.read();
-    serialRead += c;
-    delay(2);
-  }
-  if(serialRead.length() > 0)
-  {
-
-    if(serialRead.substring(0,2) == "L0")
-    {
-      setPoint = serialRead.substring(2).toInt();
-    }
-  }
-
-  String strCmp = serialRead.substring(0,2);
-  if(strCmp == "L0") { setPoint = serialRead.substring(2).toInt(); }
-  if(strCmp == "p+") { kp = kp + 0.1; }
-  if(strCmp == "p-") { kp -= 0.1; }
-  if(strCmp == "i+") { ki += 0.001; }
-  if(strCmp == "i-") { ki -= 0.001; }
-  if(strCmp == "d+") { kd += 0.001; }
-  if(strCmp == "d-") { kd -= 0.001; }
-}
-  
-void sendSerial()         //Dados para o monitor serial
-{
-  if(millis() - lastTime > 1000){
-    lastTime = millis();
-    String msgPID = String((float)pid0) + " " + String((float)pid1) + " " + String((float)pid2) + " " + String((float)pid3);
-    String msgLDR = "LDR 0: " + String((int)ldrRead0) + " LDR 1: " + String((int)ldrRead1) + " LDR 2: " + String((int)ldrRead2);
-    Serial.println(msgPID + "\t" + msgLDR);
-    
-    mySerial.println("kp " + String((float)kp));
-    mySerial.println("ki " + String((float)ki));
-    mySerial.println("kd " + String((float)kd));
-  }
-}
-```
  
 ### MELHORIAS NO PID
 
