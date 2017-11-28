@@ -93,6 +93,38 @@ Uma vez que o erro = Setpoint - entrada, qualquer alteração no Setpoint causa 
 <img src="https://github.com/lucasbh/Dimmerizador-com-Controlador-PID/blob/master/Imagens/DonMExplain.png?raw=true" width="350">
 
 A derivada do erro é igual à derivada negativa da entrada, exceto quando o Setpoint está mudando. Isso acaba sendo uma solução perfeita. Em vez de adicionar (Kd * derivative of Error), subtrai-se (Kd * derivative of Input). Isso é conhecido como usando "Derivação na Medição"
+A Solução - Passo 1
+
+Há várias maneiras pelas quais o encerramento pode ser mitigado, mas a forma que melhor se adaptou ao projeto foi a seguinte:
+Informar ao PID os limites de saída. No código abaixo, será mostrado uma função SetOuputLimits. Uma vez atingido o limite, o PID deixa de somar (integrando.) Ele sabe que não há nada a ser feito; Uma vez que a saída não encerra, recebemos uma resposta imediata quando o ponto de ajuste cai para um alcance em que podemos fazer algo.
+<img src="https://github.com/lucasbh/Dimmerizador-com-Controlador-PID/blob/master/Imagens/No-Windup.png" width="350">
+
+A Solução - Passo 2
+Observe no gráfico acima, porém, que, enquanto nos livramos desse atraso de liquidação, não estamos por aí. Ainda há uma diferença entre o que o pid pensa que está enviando e o que está sendo enviado. Por quê? o Prazo Proporcional e (em menor medida) o Prazo Derivativo.
+
+Mesmo que o Termo Integral tenha sido seguramente apertado, P e D ainda estão adicionando seus dois centavos, produzindo um resultado maior que o limite de saída. Se o usuário chama uma função chamada "SetOutputLimits", eles devem assumir que isso significa que "a saída permanecerá dentro desses valores". Assim, para a Etapa 2, fazemos isso uma suposição válida. Além de apertar o I-Term, apertamos o valor de saída para que ele permaneça onde esperamos.
+
+O resultado
+<img src="https://github.com/lucasbh/Dimmerizador-com-Controlador-PID/blob/master/Imagens/No-Winup-Clamped.png" width="350">
+Como podemos ver, o enrolamento é eliminado. Além disso, o resultado permanece onde queremos. Isso significa que não há necessidade de aperto externo da saída. Se você quiser que ele varie entre 0 e 256, você pode configurá-los como limites de saída. 
+
+#### Reset Windup
+O encerramento do restabelecimento é uma armadilha que provavelmente reivindica mais iniciantes do que qualquer outro. Ocorre quando o PID acha que pode fazer algo que não pode. Por exemplo, a saída PWM em um Arduino aceita valores de 0-255. Por padrão, o PID não conhece isso. Se pensa que 300-400-500 funcionará, ele tentará esses valores esperando obter o que precisa. Como na realidade o valor é apertado em 255, ele continuará tentando números cada vez maiores sem chegar a lugar algum.
+O problema revela-se sob a forma de atrasos estranhos. Acima, podemos ver que a saída fica "acabada", acima do limite externo. Quando o ponto de ajuste é descartado, a saída deve diminuir antes de chegar abaixo da linha de 255.
+<img src="https://github.com/lucasbh/Dimmerizador-com-Controlador-PID/blob/master/Imagens/Windup.png" width="350">
+
+
+#### On-The-Fly Tuning Changes
+A capacidade de alterar parâmetros de sintonia enquanto o sistema está sendo executado é uma obrigação para qualquer algoritmo PID respeitável.
+Se você alterar os parâmetros enquanto o sistema vai perceber que essas alterações farão o PID se comportar de maneira totalmente inesperada. Isso tudo acontece por causa do controle Integral.
+<img src="https://github.com/lucasbh/Dimmerizador-com-Controlador-PID/blob/master/Imagens/BadIntegral.png" width="350">
+A solução para esse problema então é redimensionar errSum. Se o  Ki duplicar, basta cortar o errSum na metade. Isso evita que o termo I fique batendo. 
+<img src="https://github.com/lucasbh/Dimmerizador-com-Controlador-PID/blob/master/Imagens/GoodIntegralEqn.png" width="350">
+
+
+Em vez de ter o Ki vivo fora da integral, trazemos para dentro. Parece que não fizemos nada, mas veremos que na prática isso faz uma grande diferença.
+
+Agora, tomamos o erro e multiplicamo-lo por qualquer que seja o Ki naquele momento. Em seguida, armazenamos a soma dessa. Quando o Ki muda, não há colisão porque todos os antigos Ki já estão "no banco", por assim dizer. Recebemos uma transferência suave sem operações matemáticas adicionais. Isso pode me fazer um geek, mas acho que isso é muito sexy.
 
 ## FUNCIONAMENTO
 
