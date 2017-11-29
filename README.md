@@ -80,7 +80,7 @@ Fortaleza – CE
    O programa começa com a inicialização das variáveis do programa e as variáveis de cada controlador PID (um para cada ponto de luz, totalizando quatro). O setPoint, que é a variável de entrada do sistema, é inicializado com o valor 85. No setup é configurado cada pino e iniciado o software serial para comunicação bluetooth e o serial padrão para visualizar os dados do projeto no monitor serial. Na função loop() o programa sempre inicia verificando se há dado serial e, caso verdadeiro, os setPoints do projeto são atualizados de acordo com o que foi recebido. Em seguida é chamado a função getPID para cada ponto de luminosidade, que realiza todos os cálculos de controle e retorna um inteiro, que é um valor de 0 a 255. Logo após, é atualizado o PWM de cada LED com os valores obtidos em seu respectivo cálculo de controle e o programa retorna entra em loop.
 
  
-#### MELHORIAS NO PID
+#### - MELHORIAS NO PID
 
 - Sample Time
 
@@ -107,7 +107,7 @@ Fortaleza – CE
 
    No aplicativo Roboremo foi desenvolvido uma interface com três sliders, em que cada um representa o nível de luminosidade desejado em seu respectivo ponto de leitura. A aplicação envia uma string por bluetooth para o arduino, que processará a informação de acordo com o que foi programado e mudará o setPoint do ponto de luminosidade selecionado. A string enviada possui o seguinte formato: “ID do objeto” + “setPoint”, sendo setPoint um valor inteiro de 0 a 100.
    
-   **Interface do aplicativo de controle criado para o projeto**
+   **Interface do aplicativo de controle criado no Roboremo**
    
    <img src="https://user-images.githubusercontent.com/31712391/33371475-0277b01c-d4e2-11e7-8d11-d407ddcf4671.jpeg" width="250">
 
