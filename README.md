@@ -89,8 +89,6 @@ Fortaleza – CE
 
 - On-The-Fly Tuning Changes
 
-- Reset Windup
-
 - On/Off (Auto/Manual)
 
 - Initialization 
