@@ -28,7 +28,7 @@ Fortaleza – CE
    A base do projeto será a programação implementada numa plataforma Arduino, na qual efetuará todas as funções de PID do sistema, recebendo as leituras dos LDRs e convertendo em sinais controlados para que os Leds possam ser dimerizados e assim efetuar a iluminação necessária. 
 
 
-**-Tabela 1 - Material Utilizado**
+**Tabela 1 - Material Utilizado**
 
 |        Componentes         |                                 Descrição                                  |
 |----------------------------|----------------------------------------------------------------------------|
@@ -37,7 +37,7 @@ Fortaleza – CE
 | - 3 LDR's                  | Resistor com resistência variando com a luz incidida sobre ele.            |
 | - Módulo HC-06             | Módulo Bluetooth responsável por enviar e receber dados através da serial. |
 | - Placa de Fibra de Vidro  | Placa dupla face utilizada pra desenvolver a PCi do projeto.               |
-| - Resistores               | Valores dos REsistores mencionados em tabela 2.                            |
+| - Resistores               | Valores dos REsistores mencionados na tabela 2.                            |
 
 
 ### SOFTWARES UTILIZADOS
@@ -64,7 +64,7 @@ Fortaleza – CE
 |:-----------------------------:|:-------------------------------:|
 <img src="https://user-images.githubusercontent.com/31712391/33335241-41cbefea-d44b-11e7-912b-8225e9aac878.png" width="250">|<img src="https://user-images.githubusercontent.com/31712391/33335263-527d603a-d44b-11e7-8f97-2afcf3bdd9e2.png" width="250">
 
-** Tabela 2 - Lista de Resistores Utilizados:**
+**Tabela 2 - Lista de Resistores Utilizados: **
 
 |    **Resistor**   |    **Valor**      |
 |-------------------|-------------------|
