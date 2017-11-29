@@ -37,7 +37,7 @@ Fortaleza – CE
 | - 3 LDR's                  | Resistor com resistência variando com a luz incidida sobre ele.            |
 | - Módulo HC-06             | Módulo Bluetooth responsável por enviar e receber dados através da serial. |
 | - Placa de Fibra de Vidro  | Placa dupla face utilizada pra desenvolver a PCi do projeto.               |
-| - Resistores               | Valores dos REsistores mencionados na tabela 2.                            |
+| - Resistores               | Valores dos Resistores mencionados na tabela 2.                            |
 
 
 ### SOFTWARES UTILIZADOS
