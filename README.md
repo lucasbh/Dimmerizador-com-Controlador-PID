@@ -84,9 +84,7 @@ Fortaleza – CE
 
 - Sample Time
 
-
 - Derivative Kick
-
 
 - On-The-Fly Tuning Changes
 
@@ -98,6 +96,7 @@ Fortaleza – CE
 
 - Proportional on Measurement 
 
+- Controller Direction
 
 
 
