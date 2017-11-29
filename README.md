@@ -64,7 +64,7 @@ Fortaleza – CE
 |:-----------------------------:|:-------------------------------:|
 <img src="https://user-images.githubusercontent.com/31712391/33335241-41cbefea-d44b-11e7-912b-8225e9aac878.png" width="250">|<img src="https://user-images.githubusercontent.com/31712391/33335263-527d603a-d44b-11e7-8f97-2afcf3bdd9e2.png" width="250">
 
-**Tabela 2 - Lista de Resistores Utilizados: **
+**Tabela 2 - Lista de Resistores Utilizados:**
 
 |    **Resistor**   |    **Valor**      |
 |-------------------|-------------------|
