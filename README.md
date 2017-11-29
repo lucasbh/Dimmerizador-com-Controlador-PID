@@ -1,14 +1,16 @@
 # Dimmerizador com Controlador PID
  
-FUNDAÇÃO EDSON QUEIROZ
+**FUNDAÇÃO EDSON QUEIROZ**
 
-UNIVERSIDADE DE FORTALEZA – UNIFOR
+**UNIVERSIDADE DE FORTALEZA – UNIFOR**
 
-Centro de Ciências Tecnológicas – CCT
+**Centro de Ciências Tecnológicas – CCT**
 
 Controle Digital
+
 Dimmerizador PID
-Prof. Afonso Henrique
+
+**Prof. Afonso Henrique**
 
 ## AUTORES
 **Lucas Bezerra Holanda**
@@ -75,62 +77,40 @@ Fortaleza – CE
 
 ### A IMPLEMENTAÇÃO
 
-   O programa começa com a inicialização das variáveis do programa e as variáveis de cada controlador PID (um para cada ponto de luz, totalizando quatro). O setPoint, que é variável de entrada do sistema, é inicializado com o valor 85. No setup é configurado cada pino e iniciado o software serial para comunicação bluetooth e o serial padrão para visualizar os dados do projeto no monitor serial. Na função loop() o programa sempre inicia verificando se há dado serial e, caso verdadeiro, os setPoints do projeto são atualizados de acordo com o que foi recebido. Em seguida é chamado a função getPID para cada ponto de luminosidade, que realiza todos os cálculos de controle e retorna um inteiro, que é um valor de 0 a 255. Logo após, é atualizado o PWM de cada LED com os valores obtidos em seu respectivo cálculo de controle e o programa retorna entra em loop.
+   O programa começa com a inicialização das variáveis do programa e as variáveis de cada controlador PID (um para cada ponto de luz, totalizando quatro). O setPoint, que é a variável de entrada do sistema, é inicializado com o valor 85. No setup é configurado cada pino e iniciado o software serial para comunicação bluetooth e o serial padrão para visualizar os dados do projeto no monitor serial. Na função loop() o programa sempre inicia verificando se há dado serial e, caso verdadeiro, os setPoints do projeto são atualizados de acordo com o que foi recebido. Em seguida é chamado a função getPID para cada ponto de luminosidade, que realiza todos os cálculos de controle e retorna um inteiro, que é um valor de 0 a 255. Logo após, é atualizado o PWM de cada LED com os valores obtidos em seu respectivo cálculo de controle e o programa retorna entra em loop.
 
  
-### MELHORIAS NO PID
+#### MELHORIAS NO PID
 
-#### Sample Time
-O PID inicial é projetado para ser chamado de forma irregular. Isso causa dois problemas: 
---> O PID não obtem um comportamento consistente, uma vez que ele é chamado com uma frequência totalmente irregular. 
---> É preciso fazer computação matematica extra derivada e integral, uma vez que ambos dependem da mudança de tempo. 
-
-Para isso, a solução foi certificar que o PID seja chamado em um intervalo regular. A maneira decidida para fazer isso é especificar que a função de cálculo seja chamada de cada ciclo com base em um Tempo de Amostra pré-determinado, o PID decide se ele deve calcular ou retornar imediatamente. Uma vez que sabemos que o PID está sendo avaliado em um intervalo constante, os cálculos derivado e integral também podem ser simplificados.
-
-#### Derivative Kick
-Uma vez que o erro = Setpoint - entrada, qualquer alteração no Setpoint causa uma alteração instantânea no erro. A derivada desta mudança é infinita (na prática, uma vez que o dt não é 0, apenas acaba sendo um número muito grande). Esse número é alimentado na equação de pid, o que resulta em um pico indesejável na saída.
-
-<img src="https://github.com/lucasbh/Dimmerizador-com-Controlador-PID/blob/master/Imagens/DonMExplain.png?raw=true" width="350">
-
-A derivada do erro é igual à derivada negativa da entrada, exceto quando o Setpoint está mudando. Isso acaba sendo uma solução perfeita. Em vez de adicionar (Kd * derivative of Error), subtrai-se (Kd * derivative of Input). Isso é conhecido como usando "Derivação na Medição"
-A Solução - Passo 1
-
-Há várias maneiras pelas quais o encerramento pode ser mitigado, mas a forma que melhor se adaptou ao projeto foi a seguinte:
-Informar ao PID os limites de saída. No código abaixo, será mostrado uma função SetOuputLimits. Uma vez atingido o limite, o PID deixa de somar (integrando.) Ele sabe que não há nada a ser feito; Uma vez que a saída não encerra, recebemos uma resposta imediata quando o ponto de ajuste cai para um alcance em que podemos fazer algo.
-<img src="https://github.com/lucasbh/Dimmerizador-com-Controlador-PID/blob/master/Imagens/No-Windup.png" width="350">
-
-A Solução - Passo 2
-Observe no gráfico acima, porém, que, enquanto nos livramos desse atraso de liquidação, não estamos por aí. Ainda há uma diferença entre o que o pid pensa que está enviando e o que está sendo enviado. Por quê? o Prazo Proporcional e (em menor medida) o Prazo Derivativo.
-
-Mesmo que o Termo Integral tenha sido seguramente apertado, P e D ainda estão adicionando seus dois centavos, produzindo um resultado maior que o limite de saída. Se o usuário chama uma função chamada "SetOutputLimits", eles devem assumir que isso significa que "a saída permanecerá dentro desses valores". Assim, para a Etapa 2, fazemos isso uma suposição válida. Além de apertar o I-Term, apertamos o valor de saída para que ele permaneça onde esperamos.
-
-O resultado
-<img src="https://github.com/lucasbh/Dimmerizador-com-Controlador-PID/blob/master/Imagens/No-Winup-Clamped.png" width="350">
-Como podemos ver, o enrolamento é eliminado. Além disso, o resultado permanece onde queremos. Isso significa que não há necessidade de aperto externo da saída. Se você quiser que ele varie entre 0 e 256, você pode configurá-los como limites de saída. 
-
-#### Reset Windup
-O encerramento do restabelecimento é uma armadilha que provavelmente reivindica mais iniciantes do que qualquer outro. Ocorre quando o PID acha que pode fazer algo que não pode. Por exemplo, a saída PWM em um Arduino aceita valores de 0-255. Por padrão, o PID não conhece isso. Se pensa que 300-400-500 funcionará, ele tentará esses valores esperando obter o que precisa. Como na realidade o valor é apertado em 255, ele continuará tentando números cada vez maiores sem chegar a lugar algum.
-O problema revela-se sob a forma de atrasos estranhos. Acima, podemos ver que a saída fica "acabada", acima do limite externo. Quando o ponto de ajuste é descartado, a saída deve diminuir antes de chegar abaixo da linha de 255.
-<img src="https://github.com/lucasbh/Dimmerizador-com-Controlador-PID/blob/master/Imagens/Windup.png" width="350">
+- Sample Time
 
 
-#### On-The-Fly Tuning Changes
-A capacidade de alterar parâmetros de sintonia enquanto o sistema está sendo executado é uma obrigação para qualquer algoritmo PID respeitável.
-Se você alterar os parâmetros enquanto o sistema vai perceber que essas alterações farão o PID se comportar de maneira totalmente inesperada. Isso tudo acontece por causa do controle Integral.
-<img src="https://github.com/lucasbh/Dimmerizador-com-Controlador-PID/blob/master/Imagens/BadIntegral.png" width="350">
-A solução para esse problema então é redimensionar errSum. Se o  Ki duplicar, basta cortar o errSum na metade. Isso evita que o termo I fique batendo. 
-<img src="https://github.com/lucasbh/Dimmerizador-com-Controlador-PID/blob/master/Imagens/GoodIntegralEqn.png" width="350">
+- Derivative Kick
 
 
-Em vez de ter o Ki vivo fora da integral, trazemos para dentro. Parece que não fizemos nada, mas veremos que na prática isso faz uma grande diferença.
+- On-The-Fly Tuning Changes
 
-Agora, tomamos o erro e multiplicamo-lo por qualquer que seja o Ki naquele momento. Em seguida, armazenamos a soma dessa. Quando o Ki muda, não há colisão porque todos os antigos Ki já estão "no banco", por assim dizer. Recebemos uma transferência suave sem operações matemáticas adicionais. Isso pode me fazer um geek, mas acho que isso é muito sexy.
+- Reset Windup
+
+- On/Off (Auto/Manual)
+
+- Initialization 
+
+- Proportional on Measurement 
+
+
+
 
 ## FUNCIONAMENTO
 
    O dimmerizador controla o nível de luminosidade do ambiente automaticamente e se adapta a mudanças de claridade, aumentando ou diminuindo o brilho dos LEDs de acordo a luminosidade captada pelo LDR. No projeto desenvolvido, foi projetado três pontos de leitura de luminosidade e quatro prontos e iluminação, com LDRs e LEDs respectivamente. 
 
    No aplicativo Roboremo foi desenvolvido uma interface com três sliders, em que cada um representa o nível de luminosidade desejado em seu respectivo ponto de leitura. A aplicação envia uma string por bluetooth para o arduino, que processará a informação de acordo com o que foi programado e mudará o setPoint do ponto de luminosidade selecionado. A string enviada possui o seguinte formato: “ID do objeto” + “setPoint”, sendo setPoint um valor inteiro de 0 a 100.
+   
+   **Interface do aplicativo de controle criado para o projeto**
+   
+   <img src="https://user-images.githubusercontent.com/31712391/33371475-0277b01c-d4e2-11e7-8d11-d407ddcf4671.jpeg" width="250">
+
    	
    Ao aplicar o controle em malha aberta o dimmerizador não se adapta às condições de luminosidade do ambiente, fazendo com que o brilho dos LEDs seja alterado somente pelo aplicativo. Para fazer o dimmerizador se adaptar a luminosidade do ambiente, foi necessário realizar um controle de malha fechada. Dessa forma, o setPoint se torna a entrada do sistema, a luminosidade captada pelo LDR será a variável de controle e a resposta do sistema será o valor aplicado ao PWM que controla o brilho do LED. 
    	
@@ -141,6 +121,11 @@ Agora, tomamos o erro e multiplicamo-lo por qualquer que seja o Ki naquele momen
    Foi então adicionado um compensador integrativo de ganho Ki. Com o ganho Ki = 0.5, o compensador mostrou-se bem efetivo, mantendo o brilho sempre em torno do setPoint desejado. Para causar um efeito agradável, o Ki foi fixado em 0.009, fazendo com que as alterações de luminosidade fizessem com o que o LED mudasse seu brilho gradativamente. Com Ki = 0.009, o ganho ideal encontrado para Kp foi 0.3 e para Kd foi 0.006. 
    	
    Com o controle PID ideal encontrado para a aplicação, iniciou-se a montagem do projeto. O circuito ficou montado em uma protoboard e ficou dentro do fundo falso de uma caixa de papelão. Os LDR e LEDs ficaram fixados em cima do fundo falso, e a tampa da caixa de papelão foi usada para controlar a iluminação do sistema.
+   
+   |**Arduino com Shield conectado**|**Suporte do projeto com Led's e Ldr's**|
+|:-----------------------------:|:-------------------------------:|
+<img src="https://user-images.githubusercontent.com/31712391/33371571-5988c1ca-d4e2-11e7-836f-f11c57cf7ee9.jpeg" width="250">|<img src="https://user-images.githubusercontent.com/31712391/33371574-5b2f9d50-d4e2-11e7-8559-545ddc5f4e78.jpeg" width="250">
+
 
 
  
