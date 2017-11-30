@@ -187,6 +187,172 @@ Fortaleza – CE
 
 - Initialization 
 
+# Sample Time
+
+	//Variaveis do PID
+		float kp = 0.3,  ki = 0.09,  kd = 0.06,  i0, i1, i2, i3;
+		int setPoint = 85;                                                  //O setPoint de luminosidade sempre começa em 85% ???
+		int erro0, erro1, erro2, erro3;
+		int lastValor0, lastValor1, lastValor2, lastValor3;
+		unsigned long lastT0 = 0, lastT1 = 0, lastT2 = 0, lastT3 = 0;
+		unsigned long lastTime = 0;
+		int tAmostragem = 100;     // Tempo de amostragem = 0.2s
+		float pid0, pid1, pid2, pid3;
+		int pwmMin = 0, pwmMax = 255; 
+	void setAmostragem(int tNovo)
+		{
+		//Seta o tempo de amostragem
+		  if(tNovo > 0)
+		  {
+		    double ratio = ((double)tNovo / (double)tAmostragem);
+		    ki *= ratio;
+		    kd /= ratio;
+		    tAmostragem = (unsigned long)tNovo;
+		  }
+		}
+	void setTunings(String strCmp, int ganho)
+		{
+		//Melhoria setTunings. 
+			if(strCmp == "kp") 
+			{
+				kp = (float)ganho / 1000; 
+			}
+			if(strCmp == "ki") 
+			{
+				int KI = (float)ganho / 1000; 
+				ki = KI * tAmostragem;
+			}
+			if(strCmp == "kp") 
+			{
+				int KD = (float)ganho / 1000;
+				kd = KD / tAmostragem;
+			}
+		}
+
+# Derivative Kick
+	//Variaveis do PID
+		float kp = 0.3,  ki = 0.09,  kd = 0.06,  i0, i1, i2, i3;
+		int setPoint = 85;                                                  //O setPoint de luminosidade sempre começa em 85% ???
+		int erro0, erro1, erro2, erro3;
+		int lastValor0, lastValor1, lastValor2, lastValor3;
+		unsigned long lastT0 = 0, lastT1 = 0, lastT2 = 0, lastT3 = 0;
+		unsigned long lastTime = 0;
+		int tAmostragem = 100;     // Tempo de amostragem = 0.2s
+		float pid0, pid1, pid2, pid3;
+		int pwmMin = 0, pwmMax = 255; 
+	void setAmostragem(int tNovo)
+		{
+		//Seta o tempo de amostragem
+		  if(tNovo > 0)
+		  {
+		    double ratio = ((double)tNovo / (double)tAmostragem);
+		    ki *= ratio;
+		    kd /= ratio;
+		    tAmostragem = (unsigned long)tNovo;
+		  }
+		}
+	void setTunings(String strCmp, int ganho)
+		{
+		//Melhoria setTunings. 
+			if(strCmp == "kp") 
+			{
+				kp = (float)ganho / 1000; 
+			}
+			if(strCmp == "ki") 
+			{
+				int KI = (float)ganho / 1000; 
+				ki = KI * tAmostragem;
+			}
+			if(strCmp == "kp") 
+			{
+				int KD = (float)ganho / 1000;
+				kd = KD / tAmostragem;
+			}
+		}
+# On e off (automático e manual)
+	int ldrRead0, ldrRead1, ldrRead2;
+		int flagManAuto = 0;
+	if(!flagManAuto)      // Se a flag estiver em automatico (false)
+		  {
+		    //Calculo do PID e escrita do pid nos pinos
+		    ldrRead0 = map(analogRead(ldr0), 1023, 7, 0, 100);
+		    ldrRead1 = map(analogRead(ldr1), 1023, 7, 0, 100);
+		    ldrRead2 = map(analogRead(ldr2), 1023, 7, 0, 100);
+
+		    pid0 = getPID(ldrRead0, led0);
+		    if(pid0 != -1){analogWrite(led0, pid0);}
+
+		    pid1 = getPID((ldrRead0/2 + ldrRead1/2), led1); 
+		    if(pid1 != -1){analogWrite(led1, pid1);}
+
+		    pid2 = getPID(ldrRead1/2 + ldrRead2/2, led2);
+		    if(pid2 != -1){analogWrite(led2, pid2);}
+
+		    pid3 = getPID(ldrRead2, led3);
+		    if(pid3 != -1){analogWrite(led3, pid3);}
+
+		    sendSerial();
+		  }else                 // Se a flag estiver em manual (true)
+		  {
+		    int ledManual = setPoint*2.55;
+		    analogWrite(led0, ledManual);
+		    analogWrite(led1, ledManual);
+		    analogWrite(led2, ledManual);
+		    analogWrite(led3, ledManual);
+		  }
+		}
+	// on/off(Auto/Man): altera de manual para automatico.
+		    if(strCmp == "FA") { flagManAuto = 0; }
+		    if(strCmp == "FM") { flagManAuto = 1; }
+
+		    // setTunings: Altera os ganhos do controlador
+		    if(strCmp == "kp" || "ki" || "kd")
+		    {
+				int ganho = serialRead.substring(2).toInt();
+				setTunings(strCmp, ganho);
+			}
+# Initilization
+	int ldrRead0, ldrRead1, ldrRead2;
+		int flagManAuto = 0;
+	if(!flagManAuto)      // Se a flag estiver em automatico (false)
+		  {
+		    //Calculo do PID e escrita do pid nos pinos
+		    ldrRead0 = map(analogRead(ldr0), 1023, 7, 0, 100);
+		    ldrRead1 = map(analogRead(ldr1), 1023, 7, 0, 100);
+		    ldrRead2 = map(analogRead(ldr2), 1023, 7, 0, 100);
+
+		    pid0 = getPID(ldrRead0, led0);
+		    if(pid0 != -1){analogWrite(led0, pid0);}
+
+		    pid1 = getPID((ldrRead0/2 + ldrRead1/2), led1); 
+		    if(pid1 != -1){analogWrite(led1, pid1);}
+
+		    pid2 = getPID(ldrRead1/2 + ldrRead2/2, led2);
+		    if(pid2 != -1){analogWrite(led2, pid2);}
+
+		    pid3 = getPID(ldrRead2, led3);
+		    if(pid3 != -1){analogWrite(led3, pid3);}
+
+		    sendSerial();
+		  }else                 // Se a flag estiver em manual (true)
+		  {
+		    int ledManual = setPoint*2.55;
+		    analogWrite(led0, ledManual);
+		    analogWrite(led1, ledManual);
+		    analogWrite(led2, ledManual);
+		    analogWrite(led3, ledManual);
+		  }
+		}
+	// on/off(Auto/Man): altera de manual para automatico.
+		    if(strCmp == "FA") { flagManAuto = 0; }
+		    if(strCmp == "FM") { flagManAuto = 1; }
+
+		    // setTunings: Altera os ganhos do controlador
+		    if(strCmp == "kp" || "ki" || "kd")
+		    {
+				int ganho = serialRead.substring(2).toInt();
+				setTunings(strCmp, ganho);
+			}
 
 
 
