@@ -83,19 +83,154 @@ Fortaleza – CE
  
 #### - MELHORIAS NO PID
 
-- Sample Time
+- SAMPLE TIME
 
-- Derivative Kick
+loat kp = 0.3,  ki = 0.09,  kd = 0.06,  i0, i1, i2, i3;
+int lastValor0, lastValor1, lastValor2, lastValor3;
+unsigned long lastT0 = 0, lastT1 = 0, lastT2 = 0, lastT3 = 0;
+unsigned long lastTime = 0;
+int tAmostragem = 100;     // Tempo de amostragem = 0.2s
+float pid0, pid1, pid2, pid3;
+int pwmMin = 0, pwmMax = 255; 
 
-- On-The-Fly Tuning Changes
+- DERIVATE KICK
 
-- On/Off (Auto/Manual)
+  int *lastValor, *erro;
+  float *i;			//Soma dos erros
+  unsigned long *lastTempo;
+  {
+	    case led0:
+	    {
+	      lastValor = &lastValor0;
+	      erro = &erro0;
+	      lastTempo = &lastT0;
+	      i = &i0;
+	    }break;
+	    case led1:
+	    {
+	      lastValor = &lastValor1;
+	      erro = &erro1;
+	      lastTempo = &lastT1;
+	      i = &i1;
+	    }break;
+	    case led2:
+	    {
+	      lastValor = &lastValor2;
+	      erro = &erro2;
+	      lastTempo = &lastT2;
+	      i = &i2;
+	    }break;
+	    case led3:
+	    {
+	      lastValor = &lastValor3;
+	      erro = &erro3;
+	      lastTempo = &lastT3;
+	      i = &i3;
+	    }break;
+	    
+  //unsigned long tempoAnterior = *tempoAtual;
+  unsigned long Agora = millis();
+  double difTempo = Agora - *lastTempo;
+  if(difTempo>=tAmostragem)	//Se a variação de tempo(dt) for maior que o tempo de amostragem, executa o codigo
+  {
+    //Encontrando E(t) (erro)
+    *erro = setPoint - ldrRead;		//Erro
+
+    double dInput = ldrRead - *lastValor;	 // Melhoria Derivative Kick: Qualquer mudança no setPoint nao causara oscilação
+    		//dInput = input - lastInput
+
+    float p = *erro * kp;   // P = kp*E(t)
+
+    *i += *erro * ki;         // i = ki*S(E(t)*dt)  --->  i = S(ki*E(t)*dt) Melhoria tuning changes
+    		 // Com a melhoria sample time, sabemos que o intervalo
+    		// do tempo de execução é constante e dt não é mais necessário.
+    if(*i > pwmMax) { *i = pwmMax; }        // a integração está limitada a 0 e 255
+    if(*i < pwmMin) { *i = pwmMin; }
+		 
+ // Com a melhoria sample time, sabemos que o intervalo
+ // do tempo de execução é constante e dt não é mais necessário.
+
+    float d = kd * dInput;        // d = kd*(dE(t)/d(t))			--> Com a melhoria
+
+    float PID = p + *i - d;		// Com a melhoria derivative kick, o compensador se torna negativo. 
+    if(PID > pwmMax) { PID = pwmMax; }
+    if(PID < pwmMin) { PID = pwmMin; }
+
+    *lastValor = ldrRead;
+    *lastTempo = Agora;
+    return PID;
+  }else return -1;
+}
+
+void setAmostragem(int tNovo)
+{
+//Seta o tempo de amostragem
+  if(tNovo > 0)
+  {
+    double ratio = ((double)tNovo / (double)tAmostragem);
+    ki *= ratio;
+    kd /= ratio;
+    tAmostragem = (unsigned long)tNovo;
+  }
+}
+
+void setTunings(String strCmp, int ganho)
+{
+//Melhoria setTunings. 
+	if(strCmp == "kp") 
+	{
+		kp = (float)ganho / 1000; 
+	}
+	if(strCmp == "ki") 
+	{
+		int KI = (float)ganho / 1000; 
+		ki = KI * tAmostragem;
+	}
+	if(strCmp == "kp") 
+	{
+		int KD = (float)ganho / 1000;
+		kd = KD / tAmostragem;
+	}
+}
+
+/*void setOutLimit(double Min, double Max)
+{
+//Melhoria reset windup.
+   if(Min > Max) return;
+   pwmMin = Min;
+   pwmMax = Max;
+    
+   if(PID > pwmMax) PID = pwmMax;
+   else if(PID < pwmMin) PID = pwmMin;
+ 
+   if(i> outMax) i= outMax;
+   else if(i< outMin) i= outMin;
+}*/
+
+ 
+- ON/OFF (AUTOMATE/MANUAL)
+  // on/off(Auto/Man): altera de manual para automatico.
+    if(strCmp == "FA") { flagManAuto = 0; }
+     if(strCmp == "FM") { flagManAuto = 1; }
+    
+    // setTunings: Altera os ganhos do controlador
+    if(strCmp == "kp" || "ki" || "kd")
+    {
+		int ganho = serialRead.substring(2).toInt();
+		setTunings(strCmp, ganho);
+	}
+
+	//setSampleTime
+	if(strCmp == "ST") 
+	{
+		int newAmostragem = serialRead.substring(2).toInt();
+		setAmostragem(newAmostragem); 
+	}
+  }
+}
 
 - Initialization 
 
-- Proportional on Measurement 
-
-- Controller Direction
 
 
 
